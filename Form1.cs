@@ -326,19 +326,20 @@ namespace JarFileEditor
                     Match m_fotaDatVersionInfo = r_fotaDatVersionInfo.Match(targetVersionInfo);
 
                     if (m_fotaDatVersionInfo.Success) {
+                        string dummyNumPattern = @"(?<pkgversion>PkgVersion.*?=.*?\.?\.?)(?<version>\d*?)\r";
+                        string fotaFileUrlPattern = @"(?<first>FileURL.*?=.*?:.*?)(?<port>:\d*)(?<last>/.*?dat)";
+                        string dummyFileSizePattern = @"(?<index>FileSize.*?)=(?<filesize>\d*)";
 
-                        Regex r_dummyNumPattern =new Regex(@"(?<pkgversion>PkgVersion.*?=.*?\.?\.?)(?<version>\d*?)\r",RegexOptions.Singleline);
+                        Regex r_dummyNumPattern =new Regex(dummyNumPattern,RegexOptions.Singleline);
                         Match m_dummyNumPattern = r_dummyNumPattern.Match(targetVersionInfo);
                         string targetVersion = m_dummyNumPattern.Groups["version"].Value;
+                        string dummyVersion = targetVersion.PadLeft(targetVersion.Length,'0');
+                         
+                        targetVersionInfo =Regex.Replace(targetVersionInfo,dummyNumPattern,"{0}"+dummyVersion);
+                        targetVersionInfo = Regex.Replace(targetVersion, fotaFileUrlPattern, "$1"+":46105"+"$2");
+                        targetVersionInfo = Regex.Replace(targetVersion, dummyFileSizePattern, "$1=2");
 
-                        string fotaFileUrlPattern = @"(?<first>FileURL.*?=.*?:.*?:)(?<port>\d*)(?<last>/.*?dat)";
-
-                        string dummyFileSizePattern = @"(?<index>FileSize.*?=)(?<filesize>\d*)";
-
-                        targetVersionInfo = Regex.Replace(targetVersionInfo,dummyNumPattern,dummyNum,RegexOptions.Singleline);
-
-
-
+                        MessageBox.Show(targetVersionInfo);
                     }
 
                     
