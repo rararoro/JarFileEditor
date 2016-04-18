@@ -9,12 +9,14 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Collections;
+using System.IO;
 
 namespace JarFileEditor
 {
     public partial class Form1 : Form
     {
         JarFile jarFile = new JarFile();
+        IndexFile indexFile = new IndexFile();
         Button button1 = new Button();
         Button button2 = new Button();
         Button button3 = new Button();
@@ -241,12 +243,13 @@ namespace JarFileEditor
 
                 checkbox1[i].Enabled = false;
             }
-            for (int i = 0; i < osvDatFile.Count; i++)
-            {
-               
-               // MessageBox.Show("osvは"+ Right((string)jarFile.DatFiles1[i], 8));
 
-            }
+            //for (int i = 0; i < osvDatFile.Count; i++)
+            //{
+               
+            //   // MessageBox.Show("osvは"+ Right((string)jarFile.DatFiles1[i], 8));
+
+            //}
 
 
             create_dmi_file_button = new Button();//OSVdat読み込み用のボタンを表示
@@ -296,7 +299,13 @@ namespace JarFileEditor
             System.IO.DirectoryInfo di = new System.IO.DirectoryInfo(jarFileUnZipTempFolder);
             System.IO.FileInfo[] files =
             di.GetFiles("*.txt", System.IO.SearchOption.TopDirectoryOnly);
-            
+           string indexfilePath=  files[0].FullName;
+
+
+            StreamReader sr = new StreamReader(indexfilePath, Encoding.GetEncoding("Shift_JIS"));
+            indexFile.IndexFileAllText = sr.ReadToEnd();
+            sr.Close();
+
 
 
 
