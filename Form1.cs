@@ -318,13 +318,15 @@ namespace JarFileEditor
                 m_versionInfo = m_versionInfo.NextMatch();
             }
 
+
+            string dmiVersionInfo = "";
             for (int i =0; i <indexFile.VersionInfo.Count;i++) {
                 string targetVersionInfo = (string)indexFile.VersionInfo[i];
 
                 for(int j = 0; j < jarFile.FotaDatFile.Count; j++) {
                     Regex r_fotaDatVersionInfo =new Regex(@"\[VERSIONINFO\].*?" + Regex.Escape(Right((string)jarFile.FotaDatFile[j], 8)) + @".*?\[END-VERSIONINFO\]",RegexOptions.Singleline);
                     Match m_fotaDatVersionInfo = r_fotaDatVersionInfo.Match(targetVersionInfo);
-
+                    
                     if (m_fotaDatVersionInfo.Success) {
                         string dummyNumPattern = @"(?<pkgversion>PkgVersion.*?=.*?\.?\.?)(?<version>\d*?)\r";
                         string fotaFileUrlPattern = @"(?<first>FileURL.*?=.*?:.*?)(?<port>:\d*)(?<last>/.*?dat)";
@@ -333,22 +335,36 @@ namespace JarFileEditor
                         Regex r_dummyNumPattern =new Regex(dummyNumPattern,RegexOptions.Singleline);
                         Match m_dummyNumPattern = r_dummyNumPattern.Match(targetVersionInfo);
                         string targetVersion = m_dummyNumPattern.Groups["version"].Value;
-                        string dummyVersion = targetVersion.PadLeft(targetVersion.Length,'0');
+                        string dummyVersion = (j+1).ToString().PadLeft(targetVersion.Length,'0');
                          
-                        targetVersionInfo =Regex.Replace(targetVersionInfo,dummyNumPattern,"{0}"+dummyVersion);
-                        targetVersionInfo = Regex.Replace(targetVersion, fotaFileUrlPattern, "$1"+":46105"+"$2");
-                        targetVersionInfo = Regex.Replace(targetVersion, dummyFileSizePattern, "$1=2");
+                        targetVersionInfo =Regex.Replace(targetVersionInfo,dummyNumPattern, "${pkgversion}"+dummyVersion);
+                        targetVersionInfo = Regex.Replace(targetVersionInfo, fotaFileUrlPattern, "${first}"+":46105"+"${last}");
+                        targetVersionInfo = Regex.Replace(targetVersionInfo, dummyFileSizePattern, "$1=2");
 
-                        MessageBox.Show(targetVersionInfo);
+                        StreamWriter sw1 = new StreamWriter(jarFileUnZipTempFolder + "/dmi/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.FotaDatFile[j],8), false, Encoding.GetEncoding("shift_jis"));
+                        sw1.Write("1\n");
+                        sw1.Close();
+
+
                     }
+                    File.Copy(jarFileUnZipTempFolder+"/updatefile/"+jarFile.BaseName+"_"+Right((string)jarFile.DatFile[i],8), jarFileUnZipTempFolder + "/dmi/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.DatFile[j], 8));
 
-                    
                 }
-
-
-
-
+                dmiVersionInfo = dmiVersionInfo + targetVersionInfo+"\r\n";
+                
             }
+            string dmiIndexVersionInfoPattern = @"\[VERSIONINFO\].*\[END-VERSIONINFO\]";
+            string dmiIndexFileAllText = indexFile.IndexFileAllText;
+
+            dmiIndexFileAllText = Regex.Replace(dmiIndexFileAllText,dmiIndexVersionInfoPattern,dmiVersionInfo,RegexOptions.Singleline);
+            MessageBox.Show(dmiIndexFileAllText);
+
+            //書き込むファイルが既に存在している場合は、上書きする
+            StreamWriter sw = new StreamWriter(jarFileUnZipTempFolder+"/dmi/"+jarFile.BaseName+".txt",false,Encoding.GetEncoding("shift_jis"));
+            //TextBox1.Textの内容を書き込む
+            sw.Write(dmiIndexFileAllText);
+            //閉じる
+            sw.Close();
 
 
         }
