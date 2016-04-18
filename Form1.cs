@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Collections;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace JarFileEditor
 {
@@ -306,7 +307,47 @@ namespace JarFileEditor
             indexFile.IndexFileAllText = sr.ReadToEnd();
             sr.Close();
 
+            string indexFileAllText = indexFile.IndexFileAllText;
 
+            Regex r_versionInfo = new Regex(@"\[VERSIONINFO\].*?\[END-VERSIONINFO\]", RegexOptions.Singleline);
+            Match m_versionInfo = r_versionInfo.Match(indexFileAllText);
+
+            while (m_versionInfo.Success)
+            {
+                indexFile.VersionInfo.Add(m_versionInfo.Value);
+                m_versionInfo = m_versionInfo.NextMatch();
+            }
+
+            for (int i =0; i <indexFile.VersionInfo.Count;i++) {
+                string targetVersionInfo = (string)indexFile.VersionInfo[i];
+
+                for(int j = 0; j < jarFile.FotaDatFile.Count; j++) {
+                    Regex r_fotaDatVersionInfo =new Regex(@"\[VERSIONINFO\].*?" + Regex.Escape(Right((string)jarFile.FotaDatFile[j], 8)) + @".*?\[END-VERSIONINFO\]",RegexOptions.Singleline);
+                    Match m_fotaDatVersionInfo = r_fotaDatVersionInfo.Match(targetVersionInfo);
+
+                    if (m_fotaDatVersionInfo.Success) {
+
+                        Regex r_dummyNumPattern =new Regex(@"(?<pkgversion>PkgVersion.*?=.*?\.?\.?)(?<version>\d*?)\r",RegexOptions.Singleline);
+                        Match m_dummyNumPattern = r_dummyNumPattern.Match(targetVersionInfo);
+                        string targetVersion = m_dummyNumPattern.Groups["version"].Value;
+
+                        string fotaFileUrlPattern = @"(?<first>FileURL.*?=.*?:.*?:)(?<port>\d*)(?<last>/.*?dat)";
+
+                        string dummyFileSizePattern = @"(?<index>FileSize.*?=)(?<filesize>\d*)";
+
+                        targetVersionInfo = Regex.Replace(targetVersionInfo,dummyNumPattern,dummyNum,RegexOptions.Singleline);
+
+
+
+                    }
+
+                    
+                }
+
+
+
+
+            }
 
 
         }
