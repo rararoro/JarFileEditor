@@ -128,35 +128,46 @@ namespace JarFileEditor
                 results = results.Replace("\r\n", "");//改行コードを置換
                 p.WaitForExit();
                 p.Close();
+                string jarExePath = jarFile.JarExePath = results;
 
                 if (results != "")//パスが取得できていたら
                 {
-                    //MessageBox.Show(results);//jarのパス
-                    string jarExePath = jarFile.JarExePath = results;
+                    BackgroundWorker bw = new BackgroundWorker();
+                    bw.WorkerReportsProgress = true;
+                    bw.WorkerSupportsCancellation = true;
+                    bw.DoWork += new DoWorkEventHandler(bw_DoWork);
+                    bw.ProgressChanged += new ProgressChangedEventHandler(bw_ProgressChanged);
+                    bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
 
-                    Process p2 = new Process();
-                    p2.StartInfo.FileName = "jar";
-                    p2.StartInfo.UseShellExecute = false;
-                    p2.StartInfo.RedirectStandardOutput = true;
-                    p2.StartInfo.RedirectStandardInput = false;
-                    p2.StartInfo.CreateNoWindow = false;
-                    p2.StartInfo.WorkingDirectory = jarFileUnZipTempFolder;
-                    p2.StartInfo.Arguments = @"xvf " + jarFilePath;
-                    p2.Start();
-                    string results2 = p2.StandardOutput.ReadToEnd();
-                    p2.WaitForExit();
-                    p2.Close();
-                    MessageBox.Show(results2);//jarを解凍
+                    bw.RunWorkerAsync();
 
-                    button2 = new Button();//dat読み込み用のボタンを表示
-                    button2.Name = "Button1";
-                    button2.Text = "osvdatファイルを選択する";
-                    button2.Location = new Point(105, 150);
-                    button2.Size = new Size(160, 20);
-                    button2.Click += new EventHandler(Button2_Click);
-                    this.Controls.Add(button2);
-                    button2.Enabled = true;
-                    label1.Text = "osvのdatファイルを選択してください。";
+                  
+
+                    //string jarExePath = jarFile.JarExePath = results;
+
+                    //Process p2 = new Process();
+                    //p2.StartInfo.FileName = "jar";
+                    //p2.StartInfo.UseShellExecute = false;
+                    //p2.StartInfo.RedirectStandardOutput = true;
+                    //p2.StartInfo.RedirectStandardInput = false;
+                    //p2.StartInfo.CreateNoWindow = false;
+                    //p2.StartInfo.WorkingDirectory = jarFileUnZipTempFolder;
+                    //p2.StartInfo.Arguments = @"xvf " + jarFilePath;
+                    //p2.Start();
+                    //string results2 = p2.StandardOutput.ReadToEnd();
+                    //p2.WaitForExit();
+                    //p2.Close();
+                    //MessageBox.Show(results2);//jarを解凍
+
+                    //button2 = new Button();//dat読み込み用のボタンを表示
+                    //button2.Name = "Button1";
+                    //button2.Text = "osvdatファイルを選択する";
+                    //button2.Location = new Point(105, 150);
+                    //button2.Size = new Size(160, 20);
+                    //button2.Click += new EventHandler(Button2_Click);
+                    //this.Controls.Add(button2);
+                    //button2.Enabled = true;
+                    //label1.Text = "osvのdatファイルを選択してください。";
                 }
                 else {
                     MessageBox.Show("jar.exeのパスが通っていないです。");
@@ -166,6 +177,58 @@ namespace JarFileEditor
             }
             catch (System.IO.IOException ex) {
                 MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void bw_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            this.label2.Text = (e.ProgressPercentage.ToString() + "%");
+        }
+
+        private void bw_DoWork(object sender, DoWorkEventArgs e){
+
+            Process p2 = new Process();
+            p2.StartInfo.FileName = "jar";
+            p2.StartInfo.UseShellExecute = false;
+            p2.StartInfo.RedirectStandardOutput = true;
+            p2.StartInfo.RedirectStandardInput = false;
+            p2.StartInfo.CreateNoWindow = false;
+            p2.StartInfo.WorkingDirectory = jarFileUnZipTempFolder;
+            p2.StartInfo.Arguments = @"xvf " + jarFile.FilePath;
+            p2.Start();
+            string results2 = p2.StandardOutput.ReadToEnd();
+            p2.WaitForExit();
+            p2.Close();
+            MessageBox.Show(results2);//jarを解凍
+
+
+
+        }
+
+        private void bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if ((e.Cancelled == true))
+            {
+                this.label2.Text = "Canceled!";
+            }
+
+            else if (!(e.Error == null))
+            {
+                this.label2.Text = ("Error: " + e.Error.Message);
+            }
+
+            else
+            {
+                this.label2.Text = "Done!";
+                button2 = new Button();//dat読み込み用のボタンを表示
+                button2.Name = "Button1";
+                button2.Text = "osvdatファイルを選択する";
+                button2.Location = new Point(105, 150);
+                button2.Size = new Size(160, 20);
+                button2.Click += new EventHandler(Button2_Click);
+                this.Controls.Add(button2);
+                button2.Enabled = true;
+                label1.Text = "osvのdatファイルを選択してください。";
             }
         }
 
@@ -417,13 +480,6 @@ namespace JarFileEditor
 
                 string targetVersionInfo = (string)indexFile.VersionInfo[i];
 
-
-                //string datFileNamePattern = @"\[VERSIONINFO\].*?FileName.*?=.*?_(?<datVersion>.*?\d\d\d\d.dat).*?\[END-VERSIONINFO\]";
-                //Match m_datFileName = Regex.Match(targetVersionInfo,datFileNamePattern,RegexOptions.Singleline);
-                //MessageBox.Show("aaaaaaa="+m_datFileName.Groups["datVersion"].Value);
-                //string datFileName = m_datFileName.Groups["datVersion"].Value;
-
-
                 Regex r_osvDatVersionInfo = new Regex(@"\[VERSIONINFO\].*?" + Regex.Escape(Right((string)jarFile.OsvDatFile[i], 8)) + @".*?\[END-VERSIONINFO\]", RegexOptions.Singleline);
                 Match m_osvDatVersionInfo = r_osvDatVersionInfo.Match(targetVersionInfo);
 
@@ -491,7 +547,7 @@ namespace JarFileEditor
             p3.StartInfo.RedirectStandardInput = false;
             p3.StartInfo.CreateNoWindow = false;
             p3.StartInfo.WorkingDirectory =folderPath;
-            p3.StartInfo.Arguments = @"-cfvM " + jarFile.BaseName+".jar "+jarFile.BaseName+".txt updatefile";
+            p3.StartInfo.Arguments = @"-cfM " + jarFile.BaseName+".jar "+jarFile.BaseName+".txt updatefile";
             p3.Start();
             string results3 = p3.StandardOutput.ReadToEnd();
             p3.WaitForExit();
@@ -500,6 +556,7 @@ namespace JarFileEditor
 
         }
 
+      
     }
 
 
