@@ -26,7 +26,7 @@ namespace JarFileEditor
         ProgressBar ProgressBar1 = new ProgressBar();
         string jarFileUnZipTempFolder;
         CheckBox[] checkbox1;
-            
+
         public Form1()
         {
             InitializeComponent();
@@ -34,7 +34,7 @@ namespace JarFileEditor
 
         private void Form1_Load(object sender, EventArgs e)
         {
-           
+
 
         }
 
@@ -69,7 +69,7 @@ namespace JarFileEditor
             jarFile.BaseName = System.IO.Path.GetFileNameWithoutExtension(jarFilePath);
             jarFileExtention = System.IO.Path.GetExtension(jarFilePath);
 
-            if (jarFileExtention ==  ".jar")
+            if (jarFileExtention == ".jar")
             {             //Buttonを表示する
                 button1 = new Button();
                 button1.Name = "Button1";
@@ -87,7 +87,7 @@ namespace JarFileEditor
         private void Button1_Click(object sender, EventArgs e) {
 
             label2.Text = jarFile.FileName;
-           
+
             button1.Enabled = false;
             JarUnZip();
 
@@ -106,15 +106,15 @@ namespace JarFileEditor
             System.IO.FileInfo fi = new System.IO.FileInfo(jarFilePath);
 
             //tempフォルダを作成
-                di = System.IO.Directory.CreateDirectory(jarFileUnZipTempFolder);
+            di = System.IO.Directory.CreateDirectory(jarFileUnZipTempFolder);
             try
             {
-             
+
                 button1.Enabled = false;
-                
+
                 //Processオブジェクトを作成
                 System.Diagnostics.Process p = new System.Diagnostics.Process();
-             
+
                 //jarのパスが通っているかをコマンドプロンプトで確認   
                 p.StartInfo.FileName = System.Environment.GetEnvironmentVariable("ComSpec");
                 p.StartInfo.UseShellExecute = false;
@@ -161,7 +161,7 @@ namespace JarFileEditor
                     MessageBox.Show("jar.exeのパスが通っていないです。");
 
                 }
-                
+
             }
             catch (System.IO.IOException ex) {
                 MessageBox.Show(ex.Message);
@@ -201,14 +201,14 @@ namespace JarFileEditor
             }
 
             checkbox1 = new CheckBox[checkboxCount];
-                       
-            for(int i =0; i<datFile.Count;i++)
+
+            for (int i = 0; i < datFile.Count; i++)
             {
                 checkbox1[i] = new CheckBox();
-                checkbox1[i].Name = "CheckBox"+i.ToString();
-                checkbox1[i].Text = Right((string)jarFile.DatFile[i],8);
+                checkbox1[i].Name = "CheckBox" + i.ToString();
+                checkbox1[i].Text = Right((string)jarFile.DatFile[i], 8);
                 checkbox1[i].Size = new Size(151, 28);
-                checkbox1[i].Location = new Point(100,170+(30*i));
+                checkbox1[i].Location = new Point(100, 170 + (30 * i));
                 this.Controls.Add(checkbox1[i]);
                 //MessageBox.Show((string)jarFile.DatFiles1[i]);
 
@@ -227,7 +227,7 @@ namespace JarFileEditor
 
         private void Button3_Click(object sender, EventArgs e)
         {
-            ArrayList osvDatFile =jarFile.OsvDatFile;
+            ArrayList osvDatFile = jarFile.OsvDatFile;
             ArrayList fotaDatFile = jarFile.FotaDatFile;
             button3.Enabled = false;
             for (int i = 0; i < checkbox1.Length; i++)
@@ -260,7 +260,7 @@ namespace JarFileEditor
 
         private void Create_DMI_File_Button_Click(object sender, EventArgs e)
         {
-              ArrayList osvDatFile =jarFile.OsvDatFile;
+            ArrayList osvDatFile = jarFile.OsvDatFile;
             ArrayList fotaDatFile = jarFile.FotaDatFile;
             button3.Enabled = false;
             for (int i = 0; i < checkbox1.Length; i++)
@@ -307,12 +307,12 @@ namespace JarFileEditor
 
         }
 
-        public void createJarFile(){
+        public void createJarFile() {
 
-            System.IO.DirectoryInfo di = new System.IO.DirectoryInfo(jarFileUnZipTempFolder);
-            System.IO.FileInfo[] files =
-            di.GetFiles("*.txt", System.IO.SearchOption.TopDirectoryOnly);
-           string indexfilePath=  files[0].FullName;
+            DirectoryInfo di = new DirectoryInfo(jarFileUnZipTempFolder);
+            FileInfo[] files =
+            di.GetFiles("*.txt", SearchOption.TopDirectoryOnly);
+            string indexfilePath = files[0].FullName;
 
 
             StreamReader sr = new StreamReader(indexfilePath, Encoding.GetEncoding("Shift_JIS"));
@@ -330,28 +330,35 @@ namespace JarFileEditor
                 m_versionInfo = m_versionInfo.NextMatch();
             }
 
+            createDMIFile();
+            createDMIOFile();
+
+
+        }
+
+        public void createDMIFile()
+        {
+
 
             string dmiVersionInfo = "";
 
-            for (int i =0; i <indexFile.VersionInfo.Count;i++) {
-                
+            for (int i = 0; i < indexFile.VersionInfo.Count; i++)
+            {
+
                 string targetVersionInfo = (string)indexFile.VersionInfo[i];
-                string datFileNamePattern = @"\[VERSIONINFO\].*?FileName.*?=.*?_(?<datVersion>.*?\d\d\d\d.dat).*?\[END-VERSIONINFO\]";
-                Match m_datFileName = Regex.Match(targetVersionInfo,datFileNamePattern,RegexOptions.Singleline);
-                MessageBox.Show("aaaaaaa="+m_datFileName.Groups["datVersion"].Value);
-                string datFileName = m_datFileName.Groups["datVersion"].Value;
 
 
+                //string datFileNamePattern = @"\[VERSIONINFO\].*?FileName.*?=.*?_(?<datVersion>.*?\d\d\d\d.dat).*?\[END-VERSIONINFO\]";
+                //Match m_datFileName = Regex.Match(targetVersionInfo,datFileNamePattern,RegexOptions.Singleline);
+                //MessageBox.Show("aaaaaaa="+m_datFileName.Groups["datVersion"].Value);
+                //string datFileName = m_datFileName.Groups["datVersion"].Value;
 
-                //for (int j = 0; j < jarFile.FotaDatFile.Count; j++) {
 
-                    Regex r_fotaDatVersionInfo =new Regex(@"\[VERSIONINFO\].*?" + Regex.Escape(Right((string)jarFile.FotaDatFile[i], 8)) + @".*?\[END-VERSIONINFO\]",RegexOptions.Singleline);
-                    Match m_fotaDatVersionInfo = r_fotaDatVersionInfo.Match(targetVersionInfo);
+                Regex r_fotaDatVersionInfo = new Regex(@"\[VERSIONINFO\].*?" + Regex.Escape(Right((string)jarFile.FotaDatFile[i], 8)) + @".*?\[END-VERSIONINFO\]", RegexOptions.Singleline);
+                Match m_fotaDatVersionInfo = r_fotaDatVersionInfo.Match(targetVersionInfo);
 
-                    if (m_fotaDatVersionInfo.Success)
-                    {
-
-                    //MessageBox.Show("if " + datFileName+" aaaaa=" + i.ToString());
+                if (m_fotaDatVersionInfo.Success)
+                {
 
                     string dummyNumPattern = @"(?<pkgversion>PkgVersion.*?=.*?\.?\.?)(?<version>\d*?)\r";
                     string fotaFileUrlPattern = @"(?<first>FileURL.*?=.*?:.*?)(?<port>:\d*)(?<last>/.*?dat)";
@@ -379,29 +386,98 @@ namespace JarFileEditor
                 }
 
 
-                //File.Copy(jarFileUnZipTempFolder + "/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.DatFile[i], 8), jarFileUnZipTempFolder + "/dmi/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.DatFile[i], 8));
+                dmiVersionInfo = dmiVersionInfo + targetVersionInfo + "\r\n";
 
-                //}
-
-                dmiVersionInfo = dmiVersionInfo + targetVersionInfo+"\r\n";
-                
             }
             string dmiIndexVersionInfoPattern = @"\[VERSIONINFO\].*\[END-VERSIONINFO\]";
             string dmiIndexFileAllText = indexFile.IndexFileAllText;
 
-            dmiIndexFileAllText = Regex.Replace(dmiIndexFileAllText,dmiIndexVersionInfoPattern,dmiVersionInfo,RegexOptions.Singleline);
+            dmiIndexFileAllText = Regex.Replace(dmiIndexFileAllText, dmiIndexVersionInfoPattern, dmiVersionInfo, RegexOptions.Singleline);
             MessageBox.Show(dmiIndexFileAllText);
 
             //書き込むファイルが既に存在している場合は、上書きする
-            StreamWriter sw = new StreamWriter(jarFileUnZipTempFolder+"/dmi/"+jarFile.BaseName+".txt",false,Encoding.GetEncoding("shift_jis"));
+            StreamWriter sw = new StreamWriter(jarFileUnZipTempFolder + "/dmi/" + jarFile.BaseName + ".txt", false, Encoding.GetEncoding("shift_jis"));
             //TextBox1.Textの内容を書き込む
             sw.Write(dmiIndexFileAllText);
             //閉じる
             sw.Close();
 
+
+
+        }
+
+
+        public void createDMIOFile()
+        {
+
+
+            string dmioVersionInfo = "";
+
+            for (int i = 0; i < indexFile.VersionInfo.Count; i++)
+            {
+
+                string targetVersionInfo = (string)indexFile.VersionInfo[i];
+
+
+                //string datFileNamePattern = @"\[VERSIONINFO\].*?FileName.*?=.*?_(?<datVersion>.*?\d\d\d\d.dat).*?\[END-VERSIONINFO\]";
+                //Match m_datFileName = Regex.Match(targetVersionInfo,datFileNamePattern,RegexOptions.Singleline);
+                //MessageBox.Show("aaaaaaa="+m_datFileName.Groups["datVersion"].Value);
+                //string datFileName = m_datFileName.Groups["datVersion"].Value;
+
+
+                Regex r_osvDatVersionInfo = new Regex(@"\[VERSIONINFO\].*?" + Regex.Escape(Right((string)jarFile.OsvDatFile[i], 8)) + @".*?\[END-VERSIONINFO\]", RegexOptions.Singleline);
+                Match m_osvDatVersionInfo = r_osvDatVersionInfo.Match(targetVersionInfo);
+
+                if (m_osvDatVersionInfo.Success)
+                {
+
+                    string dummyNumPattern = @"(?<pkgversion>PkgVersion.*?=.*?\.?\.?)(?<version>\d*?)\r";
+                    string osvFileUrlPattern = @"(?<first>FileURL.*?=.*?:.*?)(?<port>:\d*)(?<last>/.*?dat)";
+                    string dummyFileSizePattern = @"(?<FileSize>FileSize.*?)=(?<filesize>\d*)";
+
+                    Regex r_dummyNumPattern = new Regex(dummyNumPattern, RegexOptions.Singleline);
+                    Match m_dummyNumPattern = r_dummyNumPattern.Match(targetVersionInfo);
+                    string targetVersion = m_dummyNumPattern.Groups["version"].Value;
+                    string dummyVersion = (i + 1).ToString().PadLeft(targetVersion.Length, '0');
+
+                    targetVersionInfo = Regex.Replace(targetVersionInfo, dummyNumPattern, "${pkgversion}" + dummyVersion);
+                    targetVersionInfo = Regex.Replace(targetVersionInfo, osvFileUrlPattern, "${first}" + ":46110" + "${last}");
+                    targetVersionInfo = Regex.Replace(targetVersionInfo, dummyFileSizePattern, "${FileSize}=2");
+
+                    //dummydatファイルの作成
+                    StreamWriter sw1 = new StreamWriter(jarFileUnZipTempFolder + "/dmio/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.OsvDatFile[i], 8), false, Encoding.GetEncoding("shift_jis"));
+                    sw1.Write("1\n");
+                    sw1.Close();
+                }
+                else
+                {
+                    File.Copy(jarFileUnZipTempFolder + "/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.DatFile[i], 8), jarFileUnZipTempFolder + "/dmio/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.DatFile[i], 8));
+
+                }
+
+
+                dmioVersionInfo = dmioVersionInfo + targetVersionInfo + "\r\n";
+
+            }
+            string dmioIndexVersionInfoPattern = @"\[VERSIONINFO\].*\[END-VERSIONINFO\]";
+            string dmioIndexFileAllText = indexFile.IndexFileAllText;
+
+            dmioIndexFileAllText = Regex.Replace(dmioIndexFileAllText, dmioIndexVersionInfoPattern, dmioVersionInfo, RegexOptions.Singleline);
+            MessageBox.Show(dmioIndexFileAllText);
+
+            //書き込むファイルが既に存在している場合は、上書きする
+            StreamWriter sw = new StreamWriter(jarFileUnZipTempFolder + "/dmio/" + jarFile.BaseName + ".txt", false, Encoding.GetEncoding("shift_jis"));
+            //TextBox1.Textの内容を書き込む
+            sw.Write(dmioIndexFileAllText);
+            //閉じる
+            sw.Close();
+
+
+
         }
 
     }
 
+   
 
 }
