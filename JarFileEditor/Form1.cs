@@ -378,7 +378,7 @@ namespace JarFileEditor
                 else
                 {
                     MessageBox.Show("else " + i.ToString());
-                    File.Copy(jarFileUnZipTempFolder + "/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.DatFile[i], 8), jarFileUnZipTempFolder + "/dmi/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.DatFile[i], 8));
+                    File.Move(jarFileUnZipTempFolder + "/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.DatFile[i], 8), jarFileUnZipTempFolder + "/dmi/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.DatFile[i], 8));
 
                 }
 
@@ -400,6 +400,7 @@ namespace JarFileEditor
             sw.Close();
 
 
+            jarComplession(jarFileUnZipTempFolder + "/dmi/");
 
         }
 
@@ -455,7 +456,7 @@ namespace JarFileEditor
                     string fotaFileUrlPattern = @"(?<first>FileURL.*?=.*?:.*?)(?<port>:\d*)(?<last>/.*?dat)";
                     targetVersionInfo = Regex.Replace(targetVersionInfo, fotaFileUrlPattern, "${first}" + ":46105" + "${last}");
 
-                    File.Copy(jarFileUnZipTempFolder + "/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.DatFile[i], 8), jarFileUnZipTempFolder + "/dmio/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.DatFile[i], 8));
+                    File.Move(jarFileUnZipTempFolder + "/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.DatFile[i], 8), jarFileUnZipTempFolder + "/dmio/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.DatFile[i], 8));
 
                 }
 
@@ -476,12 +477,30 @@ namespace JarFileEditor
             //閉じる
             sw.Close();
 
+            jarComplession(jarFileUnZipTempFolder + "/dmio/");
 
+        }
+        public void jarComplession(string folderPath)
+        {
+            //MessageBox.Show(results);//jarのパス
+
+            Process p3 = new Process();
+            p3.StartInfo.FileName = "jar";
+            p3.StartInfo.UseShellExecute = false;
+            p3.StartInfo.RedirectStandardOutput = true;
+            p3.StartInfo.RedirectStandardInput = false;
+            p3.StartInfo.CreateNoWindow = false;
+            p3.StartInfo.WorkingDirectory =folderPath;
+            p3.StartInfo.Arguments = @"-cfvM " + jarFile.BaseName+".jar "+jarFile.BaseName+".txt updatefile";
+            p3.Start();
+            string results3 = p3.StandardOutput.ReadToEnd();
+            p3.WaitForExit();
+            p3.Close();
+            MessageBox.Show(results3);//jarを解凍
 
         }
 
     }
 
-   
 
 }
