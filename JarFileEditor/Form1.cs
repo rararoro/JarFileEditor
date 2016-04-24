@@ -370,10 +370,6 @@ namespace JarFileEditor
             //閉じる
             sw.Close();
 
-            //test2f
-            //testf
-
-            //test2
 
         }
 
