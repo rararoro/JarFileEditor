@@ -74,7 +74,7 @@ namespace JarFileEditor
                 button1 = new Button();
                 button1.Name = "Button1";
                 button1.Text = "jarファイルを解凍";
-                button1.Location = new Point(105, 100);
+                button1.Location = new Point(85, 100);
                 button1.Size = new Size(160, 20);
                 button1.Click += new EventHandler(Button1_Click);
                 this.Controls.Add(button1);
@@ -141,33 +141,7 @@ namespace JarFileEditor
 
                     bw.RunWorkerAsync();
 
-                  
 
-                    //string jarExePath = jarFile.JarExePath = results;
-
-                    //Process p2 = new Process();
-                    //p2.StartInfo.FileName = "jar";
-                    //p2.StartInfo.UseShellExecute = false;
-                    //p2.StartInfo.RedirectStandardOutput = true;
-                    //p2.StartInfo.RedirectStandardInput = false;
-                    //p2.StartInfo.CreateNoWindow = false;
-                    //p2.StartInfo.WorkingDirectory = jarFileUnZipTempFolder;
-                    //p2.StartInfo.Arguments = @"xvf " + jarFilePath;
-                    //p2.Start();
-                    //string results2 = p2.StandardOutput.ReadToEnd();
-                    //p2.WaitForExit();
-                    //p2.Close();
-                    //MessageBox.Show(results2);//jarを解凍
-
-                    //button2 = new Button();//dat読み込み用のボタンを表示
-                    //button2.Name = "Button1";
-                    //button2.Text = "osvdatファイルを選択する";
-                    //button2.Location = new Point(105, 150);
-                    //button2.Size = new Size(160, 20);
-                    //button2.Click += new EventHandler(Button2_Click);
-                    //this.Controls.Add(button2);
-                    //button2.Enabled = true;
-                    //label1.Text = "osvのdatファイルを選択してください。";
                 }
                 else {
                     MessageBox.Show("jar.exeのパスが通っていないです。");
@@ -182,7 +156,7 @@ namespace JarFileEditor
 
         private void bw_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            this.label2.Text = (e.ProgressPercentage.ToString() + "%");
+
         }
 
         private void bw_DoWork(object sender, DoWorkEventArgs e){
@@ -209,21 +183,20 @@ namespace JarFileEditor
         {
             if ((e.Cancelled == true))
             {
-                this.label2.Text = "Canceled!";
+
             }
 
             else if (!(e.Error == null))
             {
-                this.label2.Text = ("Error: " + e.Error.Message);
+                MessageBox.Show ("Error: " + e.Error.Message);
             }
 
             else
             {
-                this.label2.Text = "Done!";
                 button2 = new Button();//dat読み込み用のボタンを表示
                 button2.Name = "Button1";
                 button2.Text = "osvdatファイルを選択する";
-                button2.Location = new Point(105, 150);
+                button2.Location = new Point(85, 130);
                 button2.Size = new Size(160, 20);
                 button2.Click += new EventHandler(Button2_Click);
                 this.Controls.Add(button2);
@@ -280,7 +253,7 @@ namespace JarFileEditor
             button3 = new Button();//OSVdat読み込み用のボタンを表示
             button3.Name = "Button1";
             button3.Text = "ファイル作成";
-            button3.Location = new Point(310, 120);
+            button3.Location = new Point(290, 100);
             button3.Size = new Size(160, 20);
             button3.Click += new EventHandler(Create_DMI_File_Button_Click);
             this.Controls.Add(button3);
@@ -346,7 +319,7 @@ namespace JarFileEditor
             di = System.IO.Directory.CreateDirectory(dmioFileFolderName);
 
             try {
-                MessageBox.Show("y");
+                MessageBox.Show("ファイルを作成します。");
                 createJarFile();
 
 
@@ -387,7 +360,7 @@ namespace JarFileEditor
             createDMIFile();
             createDMIOFile();
 
-
+            label1.Text = "ファイル作成が完了しました。アプリケーションを閉じてください";
         }
 
         public void createDMIFile()
@@ -440,7 +413,6 @@ namespace JarFileEditor
                 }
                 else
                 {
-                    MessageBox.Show("else " + i.ToString());
                     File.Move(jarFileUnZipTempFolder + "/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.DatFile[i], 8), jarFileUnZipTempFolder + "/dmi/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.DatFile[i], 8));
 
                 }
@@ -453,7 +425,7 @@ namespace JarFileEditor
             string dmiIndexFileAllText = indexFile.IndexFileAllText;
 
             dmiIndexFileAllText = Regex.Replace(dmiIndexFileAllText, dmiIndexVersionInfoPattern, dmiVersionInfo, RegexOptions.Singleline);
-            MessageBox.Show(dmiIndexFileAllText);
+            MessageBox.Show("DMI用のファイルを作ります。");
 
             //書き込むファイルが既に存在している場合は、上書きする
             StreamWriter sw = new StreamWriter(jarFileUnZipTempFolder + "/dmi/" + jarFile.BaseName + ".txt", false, Encoding.GetEncoding("shift_jis"));
@@ -524,7 +496,7 @@ namespace JarFileEditor
             string dmioIndexFileAllText = indexFile.IndexFileAllText;
 
             dmioIndexFileAllText = Regex.Replace(dmioIndexFileAllText, dmioIndexVersionInfoPattern, dmioVersionInfo, RegexOptions.Singleline);
-            MessageBox.Show(dmioIndexFileAllText);
+            MessageBox.Show("DMIO用のファイルを作成します。");
 
             //書き込むファイルが既に存在している場合は、上書きする
             StreamWriter sw = new StreamWriter(jarFileUnZipTempFolder + "/dmio/" + jarFile.BaseName + ".txt", false, Encoding.GetEncoding("shift_jis"));
@@ -539,7 +511,6 @@ namespace JarFileEditor
         }
         public void jarComplession(string folderPath)
         {
-            //MessageBox.Show(results);//jarのパス
 
             Process p3 = new Process();
             p3.StartInfo.FileName = "jar";
