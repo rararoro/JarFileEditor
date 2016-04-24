@@ -55,7 +55,7 @@ namespace JarFileEditor
         private void Form1_DragDrop(object sender, DragEventArgs e)
         {
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            label2.Text = files[0];
+            //label2.Text = files[0];
 
             string jarFilePath;
             jarFilePath = files[0];
@@ -74,10 +74,11 @@ namespace JarFileEditor
                 button1 = new Button();
                 button1.Name = "Button1";
                 button1.Text = "jarファイルを解凍";
-                button1.Location = new Point(105, 127);
+                button1.Location = new Point(105, 100);
                 button1.Size = new Size(160, 20);
                 button1.Click += new EventHandler(Button1_Click);
                 this.Controls.Add(button1);
+                label1.Text="jarファイルを解凍します。";
             }
             else {
                 MessageBox.Show("拡張子が違います｡");
@@ -86,7 +87,7 @@ namespace JarFileEditor
 
         private void Button1_Click(object sender, EventArgs e) {
 
-            label2.Text = jarFile.FileName;
+            //label2.Text = jarFile.FileName;
 
             button1.Enabled = false;
             JarUnZip();
@@ -155,7 +156,7 @@ namespace JarFileEditor
                     button2.Click += new EventHandler(Button2_Click);
                     this.Controls.Add(button2);
                     button2.Enabled = true;
-
+                    label1.Text = "osvのdatファイルを選択してください。";
                 }
                 else {
                     MessageBox.Show("jar.exeのパスが通っていないです。");
@@ -216,7 +217,7 @@ namespace JarFileEditor
             button3 = new Button();//OSVdat読み込み用のボタンを表示
             button3.Name = "Button1";
             button3.Text = "ファイル作成";
-            button3.Location = new Point(310, 150);
+            button3.Location = new Point(310, 120);
             button3.Size = new Size(160, 20);
             button3.Click += new EventHandler(Create_DMI_File_Button_Click);
             this.Controls.Add(button3);
