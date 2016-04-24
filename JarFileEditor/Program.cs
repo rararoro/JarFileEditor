@@ -71,22 +71,14 @@ namespace JarFileEditor
         }
         public ArrayList OsvDatFile
         {
-            get
-            {
-                return this.osvDatFile;
-            }
-
-            set
-            {
-                this.osvDatFile = value;
-            }
+            get{return this.osvDatFile;}
+            set{this.osvDatFile = value;}
         }
         public ArrayList FotaDatFile
         {
             get { return this.fotaDatFile;}
             set {this.fotaDatFile = value; }
             
-
         }
 
     }

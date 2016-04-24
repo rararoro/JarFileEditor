@@ -1,4 +1,3 @@
-C:\Users\babaryo\Documents\jarfile\JarFileEditor\JarFileEditor\bin\Debug\JarFileEditor.exe.config
 C:\Users\babaryo\Documents\jarfile\JarFileEditor\JarFileEditor\obj\Debug\JarFileEditor.csprojResolveAssemblyReference.cache
 C:\Users\babaryo\Documents\jarfile\JarFileEditor\JarFileEditor\obj\Debug\JarFileEditor.Form1.resources
 C:\Users\babaryo\Documents\jarfile\JarFileEditor\JarFileEditor\obj\Debug\JarFileEditor.Properties.Resources.resources
