@@ -75,7 +75,7 @@ namespace JarFileEditor
                 button1.Name = "Button1";
                 button1.Text = "jarファイルを解凍";
                 button1.Location = new Point(85, 100);
-                button1.Size = new Size(160, 20);
+                button1.Size = new Size(200, 20);
                 button1.Click += new EventHandler(Button1_Click);
                 this.Controls.Add(button1);
                 label1.Text="jarファイルを解凍します。";
@@ -87,9 +87,10 @@ namespace JarFileEditor
 
         private void Button1_Click(object sender, EventArgs e) {
 
-            //label2.Text = jarFile.FileName;
+
 
             button1.Enabled = false;
+
             JarUnZip();
 
 
@@ -97,6 +98,8 @@ namespace JarFileEditor
 
 
         private void JarUnZip() {
+            //待機状態
+            Cursor.Current = Cursors.WaitCursor;
 
             string jarFileDirectoryName = jarFile.DirectoryName;
             jarFileUnZipTempFolder = jarFileDirectoryName + "/unzip";
@@ -121,7 +124,7 @@ namespace JarFileEditor
                 p.StartInfo.UseShellExecute = false;
                 p.StartInfo.RedirectStandardOutput = true;
                 p.StartInfo.RedirectStandardInput = false;
-                p.StartInfo.CreateNoWindow = false;
+                p.StartInfo.CreateNoWindow = true;
                 p.StartInfo.Arguments = @"/c where jar.exe";
                 p.Start();
                 string results = p.StandardOutput.ReadToEnd();
@@ -152,6 +155,8 @@ namespace JarFileEditor
             catch (System.IO.IOException ex) {
                 MessageBox.Show(ex.Message);
             }
+            //元に戻す
+            Cursor.Current = Cursors.Default;
         }
 
         private void bw_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -161,12 +166,13 @@ namespace JarFileEditor
 
         private void bw_DoWork(object sender, DoWorkEventArgs e){
 
+
             Process p2 = new Process();
             p2.StartInfo.FileName = "jar";
             p2.StartInfo.UseShellExecute = false;
             p2.StartInfo.RedirectStandardOutput = true;
             p2.StartInfo.RedirectStandardInput = false;
-            p2.StartInfo.CreateNoWindow = false;
+            p2.StartInfo.CreateNoWindow = true;
             p2.StartInfo.WorkingDirectory = jarFileUnZipTempFolder;
             p2.StartInfo.Arguments = @"xvf " + jarFile.FilePath;
             p2.Start();
@@ -174,7 +180,6 @@ namespace JarFileEditor
             p2.WaitForExit();
             p2.Close();
             MessageBox.Show(results2);//jarを解凍
-
 
 
         }
@@ -195,13 +200,13 @@ namespace JarFileEditor
             {
                 button2 = new Button();//dat読み込み用のボタンを表示
                 button2.Name = "Button1";
-                button2.Text = "osvdatファイルを選択する";
+                button2.Text = "200MB以上のdatファイルを選択する";
                 button2.Location = new Point(85, 130);
-                button2.Size = new Size(160, 20);
+                button2.Size = new Size(200, 20);
                 button2.Click += new EventHandler(Button2_Click);
                 this.Controls.Add(button2);
                 button2.Enabled = true;
-                label1.Text = "osvのdatファイルを選択してください。";
+                label1.Text = "200MB以上のdatファイルを選択してください。(通常はOSVファイル）";
             }
         }
 
@@ -254,34 +259,10 @@ namespace JarFileEditor
             button3.Name = "Button1";
             button3.Text = "ファイル作成";
             button3.Location = new Point(290, 100);
-            button3.Size = new Size(160, 20);
+            button3.Size = new Size(200, 20);
             button3.Click += new EventHandler(Create_DMI_File_Button_Click);
             this.Controls.Add(button3);
             button3.Enabled = true;
-
-        }
-
-        private void Button3_Click(object sender, EventArgs e)
-        {
-            ArrayList osvDatFile = jarFile.OsvDatFile;
-            ArrayList fotaDatFile = jarFile.FotaDatFile;
-            button3.Enabled = false;
-            for (int i = 0; i < checkbox1.Length; i++)
-            {
-
-                if (checkbox1[i].Checked == true)
-                {
-                    osvDatFile.Add(jarFile.DatFile[i]);
-                    fotaDatFile.Add("dummy");
-                }
-                else if (checkbox1[i].Checked == false)
-                {
-                    fotaDatFile.Add(jarFile.DatFile[i]);
-                    osvDatFile.Add("dummy");
-                }
-
-                checkbox1[i].Enabled = false;
-            }
 
         }
 
@@ -296,12 +277,13 @@ namespace JarFileEditor
                 if (checkbox1[i].Checked == true)
                 {
                     osvDatFile.Add(jarFile.DatFile[i]);
-                    fotaDatFile.Add("dummy");
+                    fotaDatFile.Add("this isn't a FOTA dat");
+
                 }
                 else if (checkbox1[i].Checked == false)
                 {
                     fotaDatFile.Add(jarFile.DatFile[i]);
-                    osvDatFile.Add("dummy");
+                    osvDatFile.Add("this isn't a OSV dat");
                 }
 
                 checkbox1[i].Enabled = false;
@@ -319,16 +301,15 @@ namespace JarFileEditor
             di = System.IO.Directory.CreateDirectory(dmioFileFolderName);
 
             try {
-                MessageBox.Show("ファイルを作成します。");
+                //MessageBox.Show("ファイルを作成します。");
+                MessageBox.Show("ファイルを作成します。", "information", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+
                 createJarFile();
-
-
-
+                
             }
             catch (System.IO.IOException ex) {
 
                 MessageBox.Show(ex.Message);
-                //test
 
             }
 
@@ -342,7 +323,7 @@ namespace JarFileEditor
             string indexfilePath = files[0].FullName;
 
 
-            StreamReader sr = new StreamReader(indexfilePath, Encoding.GetEncoding("Shift_JIS"));
+            StreamReader sr = new StreamReader(indexfilePath, Encoding.GetEncoding("EUC-JP"));
             indexFile.IndexFileAllText = sr.ReadToEnd();
             sr.Close();
 
@@ -365,54 +346,33 @@ namespace JarFileEditor
 
         public void createDMIFile()
         {
-
+            //DMIのファイルは、FOTAをそのまま（46105）にして、OSVもそのまま（46110）
 
             string dmiVersionInfo = "";
-            int dummyIndex = 0;
+
 
             for (int i = 0; i < indexFile.VersionInfo.Count; i++)
             {
 
                 string targetVersionInfo = (string)indexFile.VersionInfo[i];
 
+                //FOTAのDatファイルを検索
                 Regex r_fotaDatVersionInfo = new Regex(@"\[VERSIONINFO\].*?" + Regex.Escape(Right((string)jarFile.FotaDatFile[i], 8)) + @".*?\[END-VERSIONINFO\]", RegexOptions.Singleline);
                 Match m_fotaDatVersionInfo = r_fotaDatVersionInfo.Match(targetVersionInfo);
 
 
-                if (m_fotaDatVersionInfo.Success)
+                if (m_fotaDatVersionInfo.Success)//正なら
                 {
-                    //common
+                    //46105で置換する
                     string fotaFileUrlPattern = @"(?<first>FileURL.*?=.*?:.*?)(?<port>:\d*)(?<last>/.*?dat)";
                     targetVersionInfo = Regex.Replace(targetVersionInfo, fotaFileUrlPattern, "${first}" + ":46105" + "${last}");
 
-
-                    //fotadat on dmi
-                    string dummyNumPattern = @"(?<pkgversion>PkgVersion.*?=.*?\.?\.?)(?<version>\d*)";
-                    Regex r_dummyNumPattern = new Regex(dummyNumPattern, RegexOptions.Singleline);
-                    Match m_dummyNumPattern = r_dummyNumPattern.Match(targetVersionInfo);
-                    string targetVersion = m_dummyNumPattern.Groups["version"].Value;
-                    dummyIndex = dummyIndex + 1;
-                    string dummyVersion = (dummyIndex).ToString().PadLeft(targetVersion.Length, '0');
-
-                    targetVersionInfo = Regex.Replace(targetVersionInfo, dummyNumPattern, "${pkgversion}" + dummyVersion);
-
-
-                    //fota
-                    string dummyFileSizePattern = @"(?<FileSize>FileSize.*?)=(?<filesize>\d*)";
-                    targetVersionInfo = Regex.Replace(targetVersionInfo, dummyFileSizePattern, "${FileSize}=2");
-
-
-                    //dummydatファイルの作成
-                    StreamWriter sw1 = new StreamWriter(jarFileUnZipTempFolder + "/dmi/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.FotaDatFile[i], 8), false, Encoding.GetEncoding("shift_jis"));
-                    sw1.Write("1\n");
-                    sw1.Close();
-
-
-
-
                 }
-                else
+                else//偽なら
                 {
+                    //46110でファイルをそのまま持っていく。
+                    string osvFileUrlPattern = @"(?<first>FileURL.*?=.*?:.*?)(?<port>:\d*)(?<last>/.*?dat)";
+                    targetVersionInfo = Regex.Replace(targetVersionInfo, osvFileUrlPattern, "${first}" + ":46110" + "${last}");
                     File.Move(jarFileUnZipTempFolder + "/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.DatFile[i], 8), jarFileUnZipTempFolder + "/dmi/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.DatFile[i], 8));
 
                 }
@@ -425,17 +385,20 @@ namespace JarFileEditor
             string dmiIndexFileAllText = indexFile.IndexFileAllText;
 
             dmiIndexFileAllText = Regex.Replace(dmiIndexFileAllText, dmiIndexVersionInfoPattern, dmiVersionInfo, RegexOptions.Singleline);
-            MessageBox.Show("DMI用のファイルを作ります。");
+            //MessageBox.Show("DMI用のファイルを作ります。");
+            MessageBox.Show("DMI用のファイルを作ります。", "information", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
 
             //書き込むファイルが既に存在している場合は、上書きする
-            StreamWriter sw = new StreamWriter(jarFileUnZipTempFolder + "/dmi/" + jarFile.BaseName + ".txt", false, Encoding.GetEncoding("shift_jis"));
+            StreamWriter sw = new StreamWriter(jarFileUnZipTempFolder + "/dmi/" + jarFile.BaseName + ".txt", false, Encoding.GetEncoding("EUC-JP"));
             //TextBox1.Textの内容を書き込む
             sw.Write(dmiIndexFileAllText);
             //閉じる
             sw.Close();
-
-
+            //カーソル待機状態
+            Cursor.Current = Cursors.WaitCursor;
             jarComplession(jarFileUnZipTempFolder + "/dmi/");
+            //カーソルを元に戻す
+            Cursor.Current = Cursors.Default;
 
         }
 
@@ -445,35 +408,28 @@ namespace JarFileEditor
 
 
             string dmioVersionInfo = "";
-            int dummyIndex = 0;
+            //int dummyIndex = 0;
 
             for (int i = 0; i < indexFile.VersionInfo.Count; i++)
             {
 
                 string targetVersionInfo = (string)indexFile.VersionInfo[i];
 
+                //OSVのDatファイルを検索する
                 Regex r_osvDatVersionInfo = new Regex(@"\[VERSIONINFO\].*?" + Regex.Escape(Right((string)jarFile.OsvDatFile[i], 8)) + @".*?\[END-VERSIONINFO\]", RegexOptions.Singleline);
                 Match m_osvDatVersionInfo = r_osvDatVersionInfo.Match(targetVersionInfo);
 
-                if (m_osvDatVersionInfo.Success)
+                if (m_osvDatVersionInfo.Success)//正なら
                 {
-
-                    string dummyNumPattern = @"(?<pkgversion>PkgVersion.*?=.*?\.?\.?)(?<version>\d*)";
                     string osvFileUrlPattern = @"(?<first>FileURL.*?=.*?:.*?)(?<port>:\d*)(?<last>/.*?dat)";
                     string dummyFileSizePattern = @"(?<FileSize>FileSize.*?)=(?<filesize>\d*)";
-
-                    Regex r_dummyNumPattern = new Regex(dummyNumPattern, RegexOptions.Singleline);
-                    Match m_dummyNumPattern = r_dummyNumPattern.Match(targetVersionInfo);
-                    string targetVersion = m_dummyNumPattern.Groups["version"].Value;
-
-                    dummyIndex = dummyIndex + 1;
-                    string dummyVersion = (dummyIndex).ToString().PadLeft(targetVersion.Length, '0');
-
-                    targetVersionInfo = Regex.Replace(targetVersionInfo, dummyNumPattern, "${pkgversion}" + dummyVersion);
+                    //46110で置換
                     targetVersionInfo = Regex.Replace(targetVersionInfo, osvFileUrlPattern, "${first}" + ":46110" + "${last}");
+                    
+                    //ファイルサイズを2にする
                     targetVersionInfo = Regex.Replace(targetVersionInfo, dummyFileSizePattern, "${FileSize}=2");
 
-                    //dummydatファイルの作成
+                    //ダミーファイルの作成
                     StreamWriter sw1 = new StreamWriter(jarFileUnZipTempFolder + "/dmio/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.OsvDatFile[i], 8), false, Encoding.GetEncoding("shift_jis"));
                     sw1.Write("1\n");
                     sw1.Close();
@@ -482,8 +438,9 @@ namespace JarFileEditor
                 {
                     //common
                     string fotaFileUrlPattern = @"(?<first>FileURL.*?=.*?:.*?)(?<port>:\d*)(?<last>/.*?dat)";
+                    //46105で置換
                     targetVersionInfo = Regex.Replace(targetVersionInfo, fotaFileUrlPattern, "${first}" + ":46105" + "${last}");
-
+                    //ファイルはそのまま移動
                     File.Move(jarFileUnZipTempFolder + "/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.DatFile[i], 8), jarFileUnZipTempFolder + "/dmio/updatefile/" + jarFile.BaseName + "_" + Right((string)jarFile.DatFile[i], 8));
 
                 }
@@ -495,8 +452,10 @@ namespace JarFileEditor
             string dmioIndexVersionInfoPattern = @"\[VERSIONINFO\].*\[END-VERSIONINFO\]";
             string dmioIndexFileAllText = indexFile.IndexFileAllText;
 
+            //編集したIndexファイルで置換する
             dmioIndexFileAllText = Regex.Replace(dmioIndexFileAllText, dmioIndexVersionInfoPattern, dmioVersionInfo, RegexOptions.Singleline);
-            MessageBox.Show("DMIO用のファイルを作成します。");
+            //MessageBox.Show("DMIO用のファイルを作成します。");
+            MessageBox.Show("DMIO用のファイルを作成します。", "information", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
 
             //書き込むファイルが既に存在している場合は、上書きする
             StreamWriter sw = new StreamWriter(jarFileUnZipTempFolder + "/dmio/" + jarFile.BaseName + ".txt", false, Encoding.GetEncoding("shift_jis"));
@@ -504,27 +463,32 @@ namespace JarFileEditor
             sw.Write(dmioIndexFileAllText);
             //閉じる
             sw.Close();
-
+            //カーソル待機状態
+            Cursor.Current = Cursors.WaitCursor;
             jarComplession(jarFileUnZipTempFolder + "/dmio/");
-
-
+            //カーソルを元に戻す
+            Cursor.Current = Cursors.Default;
         }
         public void jarComplession(string folderPath)
         {
+
 
             Process p3 = new Process();
             p3.StartInfo.FileName = "jar";
             p3.StartInfo.UseShellExecute = false;
             p3.StartInfo.RedirectStandardOutput = true;
             p3.StartInfo.RedirectStandardInput = false;
-            p3.StartInfo.CreateNoWindow = false;
+            p3.StartInfo.CreateNoWindow = true;
             p3.StartInfo.WorkingDirectory =folderPath;
             p3.StartInfo.Arguments = @"-cfM " + jarFile.BaseName+".jar "+jarFile.BaseName+".txt updatefile";
             p3.Start();
             string results3 = p3.StandardOutput.ReadToEnd();
             p3.WaitForExit();
             p3.Close();
-            MessageBox.Show(results3);//jarを解凍
+
+
+            //MessageBox.Show(results3+"完了しました。");//jarを解凍
+            MessageBox.Show(results3+"完了しました","information",MessageBoxButtons.OK,MessageBoxIcon.Information,MessageBoxDefaultButton.Button1,MessageBoxOptions.DefaultDesktopOnly);
 
         }
 
